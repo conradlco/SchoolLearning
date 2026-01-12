@@ -35,9 +35,9 @@ public class WhichIsGreaterWindow extends JFrame implements ActionListener {
   private int rangeA = 20;
   private int rangeB = 50;
   private int rangeC = 200;
-  private int weightA = 50; // percent for rangeA
-  private int weightB = 25; // percent for rangeB
-  private int weightC = 25; // percent for rangeC
+  private int weightA = 60; // percent for rangeA
+  private int weightB = 30; // percent for rangeB
+  private int weightC = 10; // percent for rangeC
 
   public WhichIsGreaterWindow(ExerciseSelectorWindow parentSelector) {
     super("Greater Than Game");
