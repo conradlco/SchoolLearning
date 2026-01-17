@@ -30,7 +30,8 @@ public class WordReading extends JFrame {
 
   // Game state
   private List<String> gameWords = new ArrayList<>();
-  private int totalQuestions = 20;
+  private List<String> wrongWords = new ArrayList<>(); // track words answered incorrectly
+  private int totalQuestions = 10;
   private int currentIndex = 0;
   private int score = 0;
   private final Random random = new Random();
@@ -138,6 +139,7 @@ public class WordReading extends JFrame {
     }
 
     gameWords.clear();
+    wrongWords.clear();
 
     if (selected instanceof ReadingLevel) {
       ReadingLevel level = (ReadingLevel) selected;
@@ -193,6 +195,7 @@ public class WordReading extends JFrame {
   private void stopGame() {
     // Cancel the current game but stay on the game window ready to start another
     gameWords.clear();
+    wrongWords.clear();
     currentIndex = 0;
     score = 0;
     // UI state: allow user to start a new game
@@ -216,7 +219,16 @@ public class WordReading extends JFrame {
   }
 
   private void markAnswer(boolean wasCorrect) {
-    if (wasCorrect) score++;
+    // record the current word if incorrect
+    String currentWord = null;
+    if (currentIndex < gameWords.size()) {
+      currentWord = gameWords.get(currentIndex);
+    }
+    if (wasCorrect) {
+      score++;
+    } else if (currentWord != null) {
+      wrongWords.add(currentWord);
+    }
     currentIndex++;
 
     if (currentIndex < gameWords.size()) {
@@ -230,6 +242,34 @@ public class WordReading extends JFrame {
     // Disable answer buttons
     correctButton.setEnabled(false);
     wrongButton.setEnabled(false);
+
+    // Show the list of wrong words (if any) so the user knows what to practice
+    if (wrongWords.isEmpty()) {
+      JOptionPane.showMessageDialog(
+          this,
+          "Great! You got all words correct.",
+          "Practice Results",
+          JOptionPane.INFORMATION_MESSAGE);
+    } else {
+      // Show up to 5 wrong words without scrolling, each on its own bold line
+      int displayCount = Math.min(5, wrongWords.size());
+      JPanel panel = new JPanel();
+      panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+      panel.setBorder(new EmptyBorder(8, 12, 8, 12));
+      for (int i = 0; i < displayCount; i++) {
+        JLabel label = new JLabel(wrongWords.get(i));
+        label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        panel.add(label);
+        panel.add(Box.createRigidArea(new Dimension(0, 6)));
+      }
+      if (wrongWords.size() > displayCount) {
+        JLabel more = new JLabel(String.format("...and %d more", wrongWords.size() - displayCount));
+        more.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        panel.add(more);
+      }
+      JOptionPane.showMessageDialog(
+          this, panel, "Words to practice", JOptionPane.INFORMATION_MESSAGE);
+    }
 
     String message = String.format("You scored %d out of %d.\nPlay again?", score, totalQuestions);
     int choice =
