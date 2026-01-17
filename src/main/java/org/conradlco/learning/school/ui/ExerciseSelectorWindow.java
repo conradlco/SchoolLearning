@@ -8,6 +8,7 @@ import javax.swing.*;
 public class ExerciseSelectorWindow extends JFrame implements ActionListener {
 
   private static final String GREATER_THAN_GAME = "Greater than Game";
+  private static final String WORD_READING_GAME = "Word Reading";
 
   private JList<String> selectionList;
   private JButton playButton;
@@ -27,11 +28,10 @@ public class ExerciseSelectorWindow extends JFrame implements ActionListener {
 
     JPanel selectionPanel = new JPanel();
 
-    DefaultListModel<String> gamesListModel = new DefaultListModel<>();
-    gamesListModel.add(0, GREATER_THAN_GAME);
-    selectionList = new JList<>(gamesListModel);
+    selectionList = new JList<>(getGamesList());
     selectionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     selectionList.setVisibleRowCount(8);
+
     JScrollPane listScroll = new JScrollPane(selectionList);
     listScroll.setPreferredSize(new Dimension(300, 200));
     selectionPanel.setLayout(new BorderLayout());
@@ -44,13 +44,23 @@ public class ExerciseSelectorWindow extends JFrame implements ActionListener {
     mainContainer.add(playButton, BorderLayout.SOUTH);
   }
 
+  private DefaultListModel<String> getGamesList() {
+    DefaultListModel<String> gamesListModel = new DefaultListModel<>();
+    gamesListModel.add(0, GREATER_THAN_GAME);
+    gamesListModel.add(1, WORD_READING_GAME);
+
+    return gamesListModel;
+  }
+
   @Override
   public void actionPerformed(ActionEvent e) {
-    if (e.getSource() == playButton
-        && selectionList.getSelectedIndex() != -1
-        && GREATER_THAN_GAME.equals(selectionList.getSelectedValue())) {
+    if (e.getSource() == playButton && selectionList.getSelectedIndex() != -1) {
       this.setVisible(false);
-      SwingUtilities.invokeLater(() -> new WhichIsGreaterWindow(this).setVisible(true));
+      if (GREATER_THAN_GAME.equals(selectionList.getSelectedValue())) {
+        SwingUtilities.invokeLater(() -> new WhichIsGreaterWindow(this).setVisible(true));
+      } else if (WORD_READING_GAME.equals(selectionList.getSelectedValue())) {
+        SwingUtilities.invokeLater(() -> new WordReading(this).setVisible(true));
+      }
     }
   }
 }
