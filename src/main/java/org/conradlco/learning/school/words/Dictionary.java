@@ -42,6 +42,15 @@ public class Dictionary {
     return entries.get(level).stream().map(DictionaryEntry::word).toList();
   }
 
+  public String getRandomWord() {
+    int randomLevel = random.nextInt(ReadingLevel.values().length);
+
+    List<String> words = getWordsForLevel(ReadingLevel.values()[randomLevel]);
+    int index = random.nextInt(words.size());
+
+    return words.get(index);
+  }
+
   public String getRandomWordForLevel(ReadingLevel level) {
     List<String> words = getWordsForLevel(level);
     int index = random.nextInt(words.size());
@@ -51,7 +60,7 @@ public class Dictionary {
   private void loadFile(String filename, ReadingLevel level) {
     List<DictionaryEntry> levelEntries = entries.get(level);
     try {
-      BufferedReader br = new BufferedReader(new FileReader(filename));
+      BufferedReader br = new BufferedReader(new FileReader("src/main/resources/" + filename));
       List<String> words = br.readAllLines();
       for (String word : words) {
         String[] split = word.split(" ");
