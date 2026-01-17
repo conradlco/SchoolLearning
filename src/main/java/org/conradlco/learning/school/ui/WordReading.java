@@ -27,10 +27,14 @@ public class WordReading extends JFrame {
   private JLabel scoreLabel;
   private JSpinner questionsSpinner; // new spinner to select number of questions
   private JLabel remainingLabel; // shows questions remaining during the game
+  private JLabel progressLabel; // shows per-level progress percentage
 
   // Game state
   private List<String> gameWords = new ArrayList<>();
   private List<String> wrongWords = new ArrayList<>(); // track words answered incorrectly
+  private final java.util.Map<ReadingLevel, java.util.Set<String>> correctWordsPerLevel =
+      new java.util.EnumMap<>(ReadingLevel.class);
+  private ReadingLevel activeLevel = null; // current game's level, null for "All"
   private int totalQuestions = 10;
   private int currentIndex = 0;
   private int score = 0;
@@ -41,6 +45,10 @@ public class WordReading extends JFrame {
     this.parentSelector = parentSelector;
 
     this.dictionary = Dictionary.getInstance();
+    // initialize per-level tracking sets
+    for (ReadingLevel rl : ReadingLevel.values()) {
+      correctWordsPerLevel.put(rl, new java.util.HashSet<>());
+    }
 
     setBounds(400, 200, 600, 400);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -108,7 +116,16 @@ public class WordReading extends JFrame {
     // Remaining label on the right
     remainingLabel = new JLabel(String.format("Remaining: %d", totalQuestions));
     remainingLabel.setBorder(new EmptyBorder(0, 10, 0, 10));
-    bottomPanel.add(remainingLabel, BorderLayout.EAST);
+
+    // Progress label for per-level distinct correct words
+    progressLabel = new JLabel("Progress: 0%");
+    progressLabel.setBorder(new EmptyBorder(0, 10, 0, 10));
+
+    JPanel eastPanel = new JPanel();
+    eastPanel.setLayout(new BoxLayout(eastPanel, BoxLayout.Y_AXIS));
+    eastPanel.add(remainingLabel);
+    eastPanel.add(progressLabel);
+    bottomPanel.add(eastPanel, BorderLayout.EAST);
 
     container.add(bottomPanel, BorderLayout.SOUTH);
 
@@ -125,10 +142,20 @@ public class WordReading extends JFrame {
 
     correctButton.addActionListener(e -> markAnswer(true));
     wrongButton.addActionListener(e -> markAnswer(false));
+
+    // Update progress label whenever the level selection changes
+    levelCombo.addActionListener(e -> updateProgressLabel());
   }
 
   private void initializeGame() {
     Object selected = levelCombo.getSelectedItem();
+
+    // set activeLevel for this game (null when "All")
+    if (selected instanceof ReadingLevel) {
+      activeLevel = (ReadingLevel) selected;
+    } else {
+      activeLevel = null;
+    }
 
     // Read totalQuestions from spinner in case user changed it
     try {
@@ -180,6 +207,7 @@ public class WordReading extends JFrame {
     currentIndex = 0;
     score = 0;
     updateScoreLabel();
+    updateProgressLabel();
 
     // UI state
     playButton.setEnabled(false);
@@ -207,6 +235,7 @@ public class WordReading extends JFrame {
     wrongButton.setEnabled(false);
     wordLabel.setText("");
     updateScoreLabel();
+    updateProgressLabel();
   }
 
   private void showCurrentWord() {
@@ -226,10 +255,25 @@ public class WordReading extends JFrame {
     }
     if (wasCorrect) {
       score++;
+      // record distinct correct word for the appropriate level
+      if (currentWord != null) {
+        if (activeLevel != null) {
+          correctWordsPerLevel.get(activeLevel).add(currentWord);
+        } else {
+          // when playing All, try to resolve the word's level
+          ReadingLevel rl = dictionary.getLevelOfWord(currentWord);
+          if (rl != null) {
+            correctWordsPerLevel.get(rl).add(currentWord);
+          }
+        }
+      }
     } else if (currentWord != null) {
       wrongWords.add(currentWord);
     }
     currentIndex++;
+
+    // Update per-level progress immediately after answering
+    updateProgressLabel();
 
     if (currentIndex < gameWords.size()) {
       showCurrentWord();
@@ -256,9 +300,21 @@ public class WordReading extends JFrame {
       JPanel panel = new JPanel();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
       panel.setBorder(new EmptyBorder(8, 12, 8, 12));
+      // Header with final score
+      JLabel header =
+          new JLabel(
+              String.format(
+                  "Your final score was %d/%d, these are the words you need to practice:",
+                  score, totalQuestions));
+      // Slightly larger than the incorrect-word font so the summary stands out
+      header.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+      panel.add(header);
+      panel.add(Box.createRigidArea(new Dimension(0, 8)));
       for (int i = 0; i < displayCount; i++) {
         JLabel label = new JLabel(wrongWords.get(i));
+        // Incorrect words in a very dark red to distinguish them from the header
         label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+        label.setForeground(new Color(139, 0, 0));
         panel.add(label);
         panel.add(Box.createRigidArea(new Dimension(0, 6)));
       }
@@ -295,6 +351,7 @@ public class WordReading extends JFrame {
       // Show a final score message in the main area (they can still press Quit to Menu)
       wordLabel.setText(String.format("Final score: %d/%d", score, totalQuestions));
       updateScoreLabel();
+      updateProgressLabel();
     }
   }
 
@@ -305,6 +362,7 @@ public class WordReading extends JFrame {
     playButton.setEnabled(true);
     questionsSpinner.setEnabled(true);
     levelCombo.setEnabled(true);
+    updateProgressLabel();
 
     // Hide this window and show parent
     setVisible(false);
@@ -319,5 +377,20 @@ public class WordReading extends JFrame {
     // Update remaining
     int remaining = Math.max(0, totalQuestions - currentIndex);
     remainingLabel.setText(String.format("Remaining: %d", remaining));
+  }
+
+  private void updateProgressLabel() {
+    Object selected = levelCombo.getSelectedItem();
+    if (selected instanceof ReadingLevel) {
+      ReadingLevel rl = (ReadingLevel) selected;
+      int totalWords = dictionary.getWordsForLevel(rl).size();
+      int correctCount = correctWordsPerLevel.getOrDefault(rl, java.util.Set.of()).size();
+      int percent = totalWords > 0 ? (int) Math.round(100.0 * correctCount / totalWords) : 0;
+      progressLabel.setText(
+          String.format("Progress: %d/%d (%d%%)", correctCount, totalWords, percent));
+    } else {
+      // "All" selection — no single-level progress to show
+      progressLabel.setText("Progress: N/A");
+    }
   }
 }

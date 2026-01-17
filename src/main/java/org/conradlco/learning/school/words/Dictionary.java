@@ -57,6 +57,18 @@ public class Dictionary {
     return words.get(index);
   }
 
+  public ReadingLevel getLevelOfWord(String word) {
+    if (word == null) return null;
+    for (Map.Entry<ReadingLevel, List<DictionaryEntry>> e : entries.entrySet()) {
+      for (DictionaryEntry de : e.getValue()) {
+        if (word.equals(de.word())) {
+          return e.getKey();
+        }
+      }
+    }
+    return null;
+  }
+
   private void loadFile(String filename, ReadingLevel level) {
     List<DictionaryEntry> levelEntries = entries.get(level);
     try {
