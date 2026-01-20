@@ -1,14 +1,25 @@
 package org.conradlco.learning.school.ui;
 
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.*;
 
 public class ExerciseSelectorWindow extends JFrame implements ActionListener {
 
   private static final String GREATER_THAN_GAME = "Greater than Game";
   private static final String WORD_READING_GAME = "Word Reading";
+  private static final String WORDS_BY_SOUND = "Words By Sound";
 
   private JList<String> selectionList;
   private JButton playButton;
@@ -48,6 +59,7 @@ public class ExerciseSelectorWindow extends JFrame implements ActionListener {
     DefaultListModel<String> gamesListModel = new DefaultListModel<>();
     gamesListModel.add(0, GREATER_THAN_GAME);
     gamesListModel.add(1, WORD_READING_GAME);
+    gamesListModel.add(2, WORDS_BY_SOUND);
 
     return gamesListModel;
   }
@@ -60,6 +72,8 @@ public class ExerciseSelectorWindow extends JFrame implements ActionListener {
         SwingUtilities.invokeLater(() -> new WhichIsGreaterWindow(this).setVisible(true));
       } else if (WORD_READING_GAME.equals(selectionList.getSelectedValue())) {
         SwingUtilities.invokeLater(() -> new WordReading(this).setVisible(true));
+      } else if (WORDS_BY_SOUND.equals(selectionList.getSelectedValue())) {
+        SwingUtilities.invokeLater(() -> new WordsBySound(this).setVisible(true));
       }
     }
   }

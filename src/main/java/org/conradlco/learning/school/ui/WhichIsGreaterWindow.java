@@ -10,7 +10,7 @@ public class WhichIsGreaterWindow extends JFrame implements ActionListener {
 
   private final ExerciseSelectorWindow parentSelector;
 
-  private static final int TOTAL_QUESTIONS = 10;
+  private static final int TOTAL_QUESTIONS = 20;
 
   private int currentQuestionIndex = 0;
   private int score = 0;
