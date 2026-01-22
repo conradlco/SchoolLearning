@@ -21,11 +21,12 @@ public class WordsBySound extends JFrame {
   private JComboBox<Object> levelCombo;
   private JTextField soundField;
   private JButton showButton;
+  private JButton closeButton; // added close button
 
   // Results as a panel with 3 columns and limited rows (no scroll)
   private JPanel resultsPanel;
   private final int OPTION_FONT_SIZE = 16; // slightly larger
-  private final int MAX_ROWS = 8; // controls maximum visible rows; capacity = MAX_ROWS * 3
+  private final int MAX_ROWS = 10; // controls maximum visible rows; capacity = MAX_ROWS * 3
 
   public WordsBySound(ExerciseSelectorWindow parentSelector) {
     super("Word By Sounds");
@@ -58,12 +59,14 @@ public class WordsBySound extends JFrame {
     soundField.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
 
     showButton = new JButton("Show");
+    closeButton = new JButton("Close"); // create close button
 
     topPanel.add(new JLabel("Level:"));
     topPanel.add(levelCombo);
     topPanel.add(new JLabel("Sound of the Week:"));
     topPanel.add(soundField);
     topPanel.add(showButton);
+    topPanel.add(closeButton); // add close button to the top panel
 
     container.add(topPanel, BorderLayout.NORTH);
 
@@ -78,6 +81,14 @@ public class WordsBySound extends JFrame {
 
     // Wire action for Show button
     showButton.addActionListener(e -> onShow());
+
+    // Wire action for Close button: show parent selector and dispose this window
+    closeButton.addActionListener(e -> {
+      if (parentSelector != null) {
+        parentSelector.setVisible(true);
+      }
+      WordsBySound.this.dispose();
+    });
 
     // Live validation: enable/disable Show button depending on whether any matches exist
     soundField.getDocument().addDocumentListener(new DocumentListener() {
