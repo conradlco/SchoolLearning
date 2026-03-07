@@ -1,1 +1,1 @@
- docker run -d --name school-learning --rm -p 8080:8080 school-learning:1.01-SNAPSHOT
+ docker run -d --name school-learning --rm -p 8081:8080 school-learning:1.01-SNAPSHOT
