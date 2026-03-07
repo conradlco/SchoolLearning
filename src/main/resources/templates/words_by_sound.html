@@ -136,6 +136,38 @@
       border-color: #0066cc;
       color: #0066cc;
     }
+    .word-detail-panel {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 860px;
+      padding: 12px 20px;
+      background: #f0f8ff;
+      border: 2px solid #0066cc;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 102, 204, 0.15);
+      z-index: 100;
+    }
+    .word-detail-panel.active {
+      display: block;
+    }
+    .word-detail-panel h2 {
+      color: #0066cc;
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+    .word-detail-panel p {
+      font-size: 18px;
+      color: #333;
+      margin: 2px 0;
+    }
+    .pos-label {
+      font-weight: bold;
+      color: #0066cc;
+    }
   </style>
 </head>
 <body>
@@ -155,6 +187,11 @@
   <div id="info" class="info"></div>
 
   <div id="results" class="grid"></div>
+
+  <div id="wordDetailPanel" class="word-detail-panel">
+    <h2 id="wordTitle"></h2>
+    <p><span class="pos-label">Grammar note:</span> <span id="wordPos"></span></p>
+  </div>
 </div>
 <script th:src="@{/js/words-by-sound.js}"></script>
 </body>

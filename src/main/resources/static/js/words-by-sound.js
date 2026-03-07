@@ -5,8 +5,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeBtn = document.getElementById('close');
   const results = document.getElementById('results');
   const info = document.getElementById('info');
+  const wordDetailPanel = document.getElementById('wordDetailPanel');
+  const wordTitle = document.getElementById('wordTitle');
+  const wordPos = document.getElementById('wordPos');
 
-  const MAX_ROWS = 10;
+  const MAX_ROWS = 7;
   const CAPACITY = MAX_ROWS * 3;
 
   function fetchLevels() {
@@ -55,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function showWords() {
+    wordDetailPanel.classList.remove('active');
     const q = soundInput.value.trim();
     if (!q) return;
     const level = levelSelect.value || 'All';
@@ -99,14 +103,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function mapPartOfSpeech(abbreviation) {
     const mapping = {
-      'n.': '(noun)',
-      'v.': '(verb)',
-      'adj.': '(adjective)',
-      'adv.': '(adverb)',
-      'prep.': '(preposition)',
-      'conj.': '(conjunction)',
-      'pron.': '(pronoun)',
-      'int.': '(interjection)'
+      'n.': 'noun',
+      'v.': 'verb',
+      'adj.': 'adjective',
+      'adv.': 'adverb',
+      'prep.': 'preposition',
+      'conj.': 'conjunction',
+      'pron.': 'pronoun',
+      'int.': 'interjection'
     };
     return mapping[abbreviation] || abbreviation;
   }
@@ -134,8 +138,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showWordDialog(word, detail) {
     const posDisplay = mapPartOfSpeech(detail);
-    const message = `Word: ${word}\n\nPart of Speech: ${posDisplay}`;
-    alert(message);
+    wordTitle.textContent = word;
+    wordPos.textContent = posDisplay;
+    wordDetailPanel.classList.add('active');
   }
 
   // enlarge the sound input font and make bold
