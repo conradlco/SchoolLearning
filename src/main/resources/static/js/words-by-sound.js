@@ -48,12 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     debounceTimer = setTimeout(checkMatches, 250);
   });
 
-  levelSelect.addEventListener('change', function() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(checkMatches, 150);
-  });
-
-  showBtn.addEventListener('click', function() {
+  function showWords() {
     const q = soundInput.value.trim();
     if (!q) return;
     const level = levelSelect.value || 'All';
@@ -67,6 +62,27 @@ document.addEventListener('DOMContentLoaded', function() {
           info.textContent = `Showing ${data.length} matches`;
         }
       });
+  }
+
+  levelSelect.addEventListener('change', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      checkMatches();
+      // If sound is not empty and button is enabled, fetch and display results
+      const q = soundInput.value.trim();
+      if (q && !showBtn.disabled) {
+        showWords();
+      }
+    }, 150);
+  });
+
+  showBtn.addEventListener('click', showWords);
+
+  soundInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      showWords();
+    }
   });
 
   closeBtn.addEventListener('click', function() {
