@@ -36,7 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(r => r.json())
       .then(data => {
         showBtn.disabled = !(data && data.length > 0);
-        info.textContent = data && data.length > 0 ? '' : 'No matches';
+        if (data && data.length > 0) {
+          info.textContent = '';
+          info.style.color = '#333';
+        } else {
+          info.textContent = 'No matches';
+          info.style.color = '#d9534f';
+        }
       })
       .catch(() => {
         showBtn.disabled = true;
@@ -58,8 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
         renderResults(data);
         if (data.length >= CAPACITY) {
           info.textContent = `Showing ${data.length} of many matches`;
+          info.style.color = '#333';
         } else {
           info.textContent = `Showing ${data.length} matches`;
+          info.style.color = '#333';
         }
       });
   }
@@ -89,6 +97,20 @@ document.addEventListener('DOMContentLoaded', function() {
     window.location.href = '/';
   });
 
+  function mapPartOfSpeech(abbreviation) {
+    const mapping = {
+      'n.': '(noun)',
+      'v.': '(verb)',
+      'adj.': '(adjective)',
+      'adv.': '(adverb)',
+      'prep.': '(preposition)',
+      'conj.': '(conjunction)',
+      'pron.': '(pronoun)',
+      'int.': '(interjection)'
+    };
+    return mapping[abbreviation] || abbreviation;
+  }
+
   function renderResults(list) {
     results.innerHTML = '';
     // create grid slots up to CAPACITY (3 columns)
@@ -102,12 +124,18 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.className = 'wordBtn';
         btn.textContent = item.word;
         btn.addEventListener('click', function() {
-          alert(`${item.word} (${item.detail})`);
+          showWordDialog(item.word, item.detail);
         });
         slot.appendChild(btn);
       }
       results.appendChild(slot);
     }
+  }
+
+  function showWordDialog(word, detail) {
+    const posDisplay = mapPartOfSpeech(detail);
+    const message = `Word: ${word}\n\nPart of Speech: ${posDisplay}`;
+    alert(message);
   }
 
   // enlarge the sound input font and make bold
