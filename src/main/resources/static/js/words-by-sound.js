@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   closeBtn.addEventListener('click', function() {
-    window.location.href = '';
+    window.location.href = '/';
   });
 
   function renderResults(list) {
