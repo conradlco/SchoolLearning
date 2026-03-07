@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Words By Sound</title>
+  <link rel="stylesheet" th:href="@{/css/words.css}" />
+</head>
+<body>
+<div class="container">
+  <h1>Words By Sound</h1>
+  <div class="controls">
+    <label for="level">Level:</label>
+    <select id="level"></select>
+    <label for="sound">Sound of the Week:</label>
+    <input id="sound" type="text" />
+    <button id="show" disabled>Show</button>
+    <button id="close">Close</button>
+  </div>
+
+  <div id="info" class="info"></div>
+
+  <div id="results" class="grid"></div>
+</div>
+<script th:src="@{/js/words-by-sound.js}"></script>
+</body>
+</html>

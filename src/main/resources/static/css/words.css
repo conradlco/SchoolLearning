@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+.container { max-width: 900px; margin: 0 auto; }
+.controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.controls label { font-weight: bold; }
+.info { margin: 8px 0; color: #333; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cell { min-height: 36px; display: flex; align-items: center; justify-content: center; }
+.wordBtn { font-size: 16px; padding: 6px 8px; }
+#sound { font-size: 16px; font-weight: 700; }

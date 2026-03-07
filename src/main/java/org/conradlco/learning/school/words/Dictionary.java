@@ -1,8 +1,8 @@
 package org.conradlco.learning.school.words;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,21 +38,21 @@ public class Dictionary {
     return instance;
   }
 
-  public List<String> getWordsForLevel(ReadingLevel level) {
-    return entries.get(level).stream().map(DictionaryEntry::word).toList();
+  public List<DictionaryEntry> getWordsForLevel(ReadingLevel level) {
+    return entries.get(level).stream().toList();
   }
 
-  public String getRandomWord() {
+  public DictionaryEntry getRandomWord() {
     int randomLevel = random.nextInt(ReadingLevel.values().length);
 
-    List<String> words = getWordsForLevel(ReadingLevel.values()[randomLevel]);
+    List<DictionaryEntry> words = getWordsForLevel(ReadingLevel.values()[randomLevel]);
     int index = random.nextInt(words.size());
 
     return words.get(index);
   }
 
-  public String getRandomWordForLevel(ReadingLevel level) {
-    List<String> words = getWordsForLevel(level);
+  public DictionaryEntry getRandomWordForLevel(ReadingLevel level) {
+    List<DictionaryEntry> words = getWordsForLevel(level);
     int index = random.nextInt(words.size());
     return words.get(index);
   }
@@ -72,14 +72,18 @@ public class Dictionary {
   private void loadFile(String filename, ReadingLevel level) {
     List<DictionaryEntry> levelEntries = entries.get(level);
     try {
-      BufferedReader br = new BufferedReader(new FileReader("src/main/resources/" + filename));
-      List<String> words = br.readAllLines();
+      URL resource = this.getClass().getClassLoader().getResource(filename);
+      if (resource == null) {
+        throw new IllegalArgumentException("Resource not found: " + filename);
+      }
+      Path path = Path.of(resource.toURI());
+      List<String> words = Files.readAllLines(path);
       for (String word : words) {
         String[] split = word.split(" ");
-        levelEntries.add(new DictionaryEntry(split[0], level));
+        levelEntries.add(new DictionaryEntry(split[0], split.length > 1 ? split[1] : null, level));
       }
 
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

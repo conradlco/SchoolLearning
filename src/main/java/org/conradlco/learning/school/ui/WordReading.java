@@ -1,20 +1,37 @@
 package org.conradlco.learning.school.ui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import org.conradlco.learning.school.words.Dictionary;
+import org.conradlco.learning.school.words.DictionaryEntry;
 import org.conradlco.learning.school.words.ReadingLevel;
 
 public class WordReading extends JFrame {
 
   private final ExerciseSelectorWindow parentSelector;
 
-  private Dictionary dictionary;
+  private final Random random = new Random();
+  private final Dictionary dictionary = Dictionary.getInstance();
+
+  // Game state
+  private final List<DictionaryEntry> gameWords = new ArrayList<>();
+  private final List<DictionaryEntry> wrongWords =
+      new ArrayList<>(); // track words answered incorrectly
+  private final Map<ReadingLevel, Set<DictionaryEntry>> correctWordsPerLevel =
+      new EnumMap<>(ReadingLevel.class);
 
   // UI components
   private JComboBox<Object> levelCombo; // changed to Object to allow an "All" entry
@@ -29,22 +46,15 @@ public class WordReading extends JFrame {
   private JLabel remainingLabel; // shows questions remaining during the game
   private JLabel progressLabel; // shows per-level progress percentage
 
-  // Game state
-  private List<String> gameWords = new ArrayList<>();
-  private List<String> wrongWords = new ArrayList<>(); // track words answered incorrectly
-  private final java.util.Map<ReadingLevel, java.util.Set<String>> correctWordsPerLevel =
-      new java.util.EnumMap<>(ReadingLevel.class);
   private ReadingLevel activeLevel = null; // current game's level, null for "All"
   private int totalQuestions = 10;
   private int currentIndex = 0;
   private int score = 0;
-  private final Random random = new Random();
 
   public WordReading(ExerciseSelectorWindow parentSelector) {
     super("Word Reading Game");
     this.parentSelector = parentSelector;
 
-    this.dictionary = Dictionary.getInstance();
     // initialize per-level tracking sets
     for (ReadingLevel rl : ReadingLevel.values()) {
       correctWordsPerLevel.put(rl, new java.util.HashSet<>());
@@ -171,7 +181,7 @@ public class WordReading extends JFrame {
     if (selected instanceof ReadingLevel) {
       ReadingLevel level = (ReadingLevel) selected;
 
-      List<String> words = new ArrayList<>(dictionary.getWordsForLevel(level));
+      List<DictionaryEntry> words = new ArrayList<>(dictionary.getWordsForLevel(level));
       Collections.shuffle(words, random);
 
       if (words.size() >= totalQuestions) {
@@ -240,7 +250,7 @@ public class WordReading extends JFrame {
 
   private void showCurrentWord() {
     if (currentIndex < gameWords.size()) {
-      wordLabel.setText(gameWords.get(currentIndex));
+      wordLabel.setText(gameWords.get(currentIndex).word());
       updateScoreLabel();
     } else {
       finishGame();
@@ -249,7 +259,7 @@ public class WordReading extends JFrame {
 
   private void markAnswer(boolean wasCorrect) {
     // record the current word if incorrect
-    String currentWord = null;
+    DictionaryEntry currentWord = null;
     if (currentIndex < gameWords.size()) {
       currentWord = gameWords.get(currentIndex);
     }
@@ -257,15 +267,7 @@ public class WordReading extends JFrame {
       score++;
       // record distinct correct word for the appropriate level
       if (currentWord != null) {
-        if (activeLevel != null) {
-          correctWordsPerLevel.get(activeLevel).add(currentWord);
-        } else {
-          // when playing All, try to resolve the word's level
-          ReadingLevel rl = dictionary.getLevelOfWord(currentWord);
-          if (rl != null) {
-            correctWordsPerLevel.get(rl).add(currentWord);
-          }
-        }
+        correctWordsPerLevel.get(currentWord.level()).add(currentWord);
       }
     } else if (currentWord != null) {
       wrongWords.add(currentWord);
@@ -311,7 +313,7 @@ public class WordReading extends JFrame {
       panel.add(header);
       panel.add(Box.createRigidArea(new Dimension(0, 8)));
       for (int i = 0; i < displayCount; i++) {
-        JLabel label = new JLabel(wrongWords.get(i));
+        JLabel label = new JLabel(wrongWords.get(i).word());
         // Incorrect words in a very dark red to distinguish them from the header
         label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
         label.setForeground(new Color(139, 0, 0));

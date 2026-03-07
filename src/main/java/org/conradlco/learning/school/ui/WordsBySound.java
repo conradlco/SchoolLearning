@@ -1,15 +1,26 @@
 package org.conradlco.learning.school.ui;
 
-import org.conradlco.learning.school.words.Dictionary;
-import org.conradlco.learning.school.words.ReadingLevel;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import org.conradlco.learning.school.words.Dictionary;
+import org.conradlco.learning.school.words.DictionaryEntry;
+import org.conradlco.learning.school.words.ReadingLevel;
 
 public class WordsBySound extends JFrame {
   private final ExerciseSelectorWindow parentSelector;
@@ -83,27 +94,31 @@ public class WordsBySound extends JFrame {
     showButton.addActionListener(e -> onShow());
 
     // Wire action for Close button: show parent selector and dispose this window
-    closeButton.addActionListener(e -> {
-      if (parentSelector != null) {
-        parentSelector.setVisible(true);
-      }
-      WordsBySound.this.dispose();
-    });
+    closeButton.addActionListener(
+        e -> {
+          if (parentSelector != null) {
+            parentSelector.setVisible(true);
+          }
+          WordsBySound.this.dispose();
+        });
 
     // Live validation: enable/disable Show button depending on whether any matches exist
-    soundField.getDocument().addDocumentListener(new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) {
-        updateShowButtonEnabled();
-      }
+    soundField
+        .getDocument()
+        .addDocumentListener(
+            new DocumentListener() {
+              public void insertUpdate(DocumentEvent e) {
+                updateShowButtonEnabled();
+              }
 
-      public void removeUpdate(DocumentEvent e) {
-        updateShowButtonEnabled();
-      }
+              public void removeUpdate(DocumentEvent e) {
+                updateShowButtonEnabled();
+              }
 
-      public void changedUpdate(DocumentEvent e) {
-        updateShowButtonEnabled();
-      }
-    });
+              public void changedUpdate(DocumentEvent e) {
+                updateShowButtonEnabled();
+              }
+            });
 
     levelCombo.addActionListener(e -> updateShowButtonEnabled());
 
@@ -117,7 +132,7 @@ public class WordsBySound extends JFrame {
     if (s.isEmpty()) return List.of();
 
     Object selected = levelCombo.getSelectedItem();
-    List<String> candidates = new ArrayList<>();
+    List<DictionaryEntry> candidates = new ArrayList<>();
 
     if (selected instanceof ReadingLevel) {
       ReadingLevel rl = (ReadingLevel) selected;
@@ -129,9 +144,9 @@ public class WordsBySound extends JFrame {
     }
 
     List<String> matches = new ArrayList<>();
-    for (String w : candidates) {
-      if (w != null && w.toLowerCase().contains(s)) {
-        matches.add(w);
+    for (DictionaryEntry w : candidates) {
+      if (w != null && w.word().toLowerCase().contains(s)) {
+        matches.add(w.word());
       }
     }
 
@@ -148,25 +163,32 @@ public class WordsBySound extends JFrame {
   private JButton makeOptionButton(String word) {
     JButton b = new JButton(word);
     b.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, OPTION_FONT_SIZE));
-    b.addActionListener(ae -> {
-      ReadingLevel rl = dictionary.getLevelOfWord(word);
-      String lvl = rl != null ? rl.name() : "Unknown";
-      JOptionPane.showMessageDialog(WordsBySound.this, word + " (" + lvl + ")", "Word", JOptionPane.INFORMATION_MESSAGE);
-    });
+    b.addActionListener(
+        ae -> {
+          ReadingLevel rl = dictionary.getLevelOfWord(word);
+          String lvl = rl != null ? rl.name() : "Unknown";
+          JOptionPane.showMessageDialog(
+              WordsBySound.this, word + " (" + lvl + ")", "Word", JOptionPane.INFORMATION_MESSAGE);
+        });
     return b;
   }
 
   private void onShow() {
     String sound = soundField.getText();
     if (sound == null || sound.trim().isEmpty()) {
-      JOptionPane.showMessageDialog(this, "Please enter a sound to search for.", "Input required", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(
+          this,
+          "Please enter a sound to search for.",
+          "Input required",
+          JOptionPane.WARNING_MESSAGE);
       return;
     }
 
     List<String> matches = findMatches(sound);
 
     if (matches.isEmpty()) {
-      // Shouldn't normally happen because updateShowButtonEnabled prevents pressing, but guard anyway
+      // Shouldn't normally happen because updateShowButtonEnabled prevents pressing, but guard
+      // anyway
       // clear the results and inform the user
       resultsPanel.removeAll();
       for (int i = 0; i < MAX_ROWS * 3; i++) {
@@ -174,7 +196,11 @@ public class WordsBySound extends JFrame {
       }
       resultsPanel.revalidate();
       resultsPanel.repaint();
-      JOptionPane.showMessageDialog(this, "No words found containing '" + sound + "' for the selected level.", "No Matches", JOptionPane.INFORMATION_MESSAGE);
+      JOptionPane.showMessageDialog(
+          this,
+          "No words found containing '" + sound + "' for the selected level.",
+          "No Matches",
+          JOptionPane.INFORMATION_MESSAGE);
       showButton.setEnabled(false);
       return;
     }
